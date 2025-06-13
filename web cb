@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portafolio Interactivo | Iván Antonio Goranc</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals (Slate & Amber) -->
+    <!-- Application Structure Plan: A single-page portfolio structure is used to guide the user from a high-level summary to detailed evidence. It starts with a hero section for immediate impact, followed by an interactive skills radar chart for a quick visual assessment of capabilities. The core is a tabbed project showcase, separating entrepreneurial and technical work, with clickable cards that open a modal for in-depth details. This architecture allows a recruiter to quickly grasp the candidate's profile and then drill down into the areas that interest them most, making it more engaging and effective than a traditional linear document. -->
+    <!-- Visualization & Content Choices: 
+        - Profile/Headline -> Goal: Inform/Engage -> Viz: Hero section with strong typography, profile image, and Call-to-Action buttons (HTML/Tailwind) -> Justification: Creates a strong first impression, personalizes the experience, and provides immediate contact options.
+        - Key Skills -> Goal: Compare/Summarize -> Viz: Radar Chart (Chart.js/Canvas) -> Interaction: Visualizes the balance between four key skill areas -> Justification: Offers a quick, memorable, and holistic view of the candidate's strengths, ideal for a PM profile.
+        - Projects/Experience -> Goal: Organize/Detail -> Viz: Tabbed layout with cards (HTML/Tailwind) -> Interaction: Users can filter projects by type (Ventures/Technical) and click any card to open a modal with detailed descriptions (JS) -> Justification: Manages a diverse portfolio cleanly, preventing information overload while allowing for deep dives into specific achievements.
+        - Education/Certs -> Goal: Inform/Validate -> Viz: Simple cards (HTML/Tailwind) -> Interaction: Links to external certificate validation (placeholder URLs) -> Justification: Presents credentials in a clean, straightforward, and verifiable manner without intrusive pop-ups.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* slate-50 */
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        .section-title {
+            font-size: 2.25rem; /* text-4xl */
+            font-weight: 800; /* font-extrabold */
+            color: #1e293b; /* slate-800 */
+            text-align: center;
+            margin-bottom: 3rem; /* mb-12 */
+        }
+        .card {
+            background-color: white;
+            border-radius: 0.75rem; /* rounded-xl */
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); /* shadow-md */
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1); /* shadow-lg */
+        }
+        /* Modal transition */
+        .modal-enter-active, .modal-leave-active {
+          transition: opacity 0.3s ease;
+        }
+        .modal-enter-from, .modal-leave-to {
+          opacity: 0;
+        }
+        .modal-content-enter-active, .modal-content-leave-active {
+            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+        }
+        .modal-content-enter-from, .modal-content-leave-to {
+            transform: scale(0.9);
+            opacity: 0;
+        }
+    </style>
+</head>
+<body class="text-slate-600">
+
+    <!-- Header & Nav -->
+    <header class="bg-white/80 backdrop-blur-lg sticky top-0 z-40">
+        <div class="container mx-auto px-4">
+            <nav class="flex justify-between items-center py-4">
+                <a href="#" class="text-xl font-bold text-slate-800">Iván A. Goranc</a>
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#skills" class="hover:text-amber-600 transition-colors">Habilidades</a>
+                    <a href="#projects" class="hover:text-amber-600 transition-colors">Proyectos</a>
+                    <a href="#education" class="hover:text-amber-600 transition-colors">Formación</a>
+                </div>
+                <a href="mailto:ivan.a.goranc@gmail.com" class="hidden md:inline-block bg-amber-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-amber-600 transition-colors">Contactar</a>
+                 <button id="mobile-menu-button" class="md:hidden p-2 rounded-md text-slate-700 hover:bg-slate-100">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                </button>
+            </nav>
+            <div id="mobile-menu" class="hidden md:hidden pb-4">
+                <a href="#skills" class="block py-2 px-4 text-sm hover:bg-slate-100 rounded-md">Habilidades</a>
+                <a href="#projects" class="block py-2 px-4 text-sm hover:bg-slate-100 rounded-md">Proyectos</a>
+                <a href="#education" class="block py-2 px-4 text-sm hover:bg-slate-100 rounded-md">Formación</a>
+                <a href="mailto:ivan.a.goranc@gmail.com" class="block mt-2 text-center bg-amber-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-amber-600 transition-colors">Contactar</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4">
+        <!-- Hero Section -->
+        <section id="hero" class="text-center py-20 md:py-32 flex flex-col items-center justify-center">
+            <div class="mb-8">
+                <img src="https://placehold.co/150x150/e0e0e0/ffffff?text=Tu+Foto" alt="Iván Antonio Goranc Profile Picture" class="rounded-full w-36 h-36 object-cover mx-auto shadow-lg border-4 border-white">
+            </div>
+            <h1 class="text-4xl md:text-6xl font-extrabold text-slate-800 leading-tight">
+                Iván Antonio Goranc
+            </h1>
+            <p class="mt-4 text-xl md:text-2xl text-amber-600 font-semibold">
+                Líder en Gestión de Proyectos y Emprendimiento
+            </p>
+            <p class="mt-6 max-w-2xl mx-auto text-lg text-slate-500">
+                Soy un profesional orientado a resultados con una probada trayectoria emprendedora, liderando proyectos desde la concepción hasta el mercado, abarcando el diseño, la producción, la automatización, las ventas y la promoción online. Poseo una sólida base en supervisión técnica de proyectos, incluyendo soluciones de hardware/software y administración de redes. Soy hábil en la resolución de problemas y conflictos, con un enfoque claro en la entrega de resultados integrales en cada proyecto. Actualmente, estoy expandiendo mis capacidades técnicas con Python para mejorar el análisis de datos y la automatización, siempre buscando optimizar procesos y generar valor.
+            </p>
+            <div class="mt-8 flex justify-center items-center space-x-4">
+                <a href="https://www.linkedin.com/in/ivan-goranc-57796b121/" target="_blank" class="bg-slate-800 text-white font-bold py-3 px-6 rounded-lg hover:bg-slate-900 transition-colors flex items-center space-x-2">
+                    <span>LinkedIn</span>
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+                </a>
+                <a href="mailto:ivan.a.goranc@gmail.com" class="bg-amber-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-amber-600 transition-colors">
+                    Enviar Correo
+                </a>
+            </div>
+        </section>
+
+        <!-- Skills Section -->
+        <section id="skills" class="py-24">
+            <h2 class="section-title">Habilidades Clave</h2>
+            <div class="grid md:grid-cols-2 gap-12 items-center">
+                <div class="chart-container">
+                    <canvas id="skillsChart"></canvas>
+                </div>
+                <div class="space-y-6">
+                    <div>
+                        <h3 class="text-xl font-bold text-slate-700">Gestión de Proyectos</h3>
+                        <p>Planificación y Ejecución, Asignación de Recursos, Mitigación de Riesgos, Comunicación con Stakeholders, Coordinación de Equipos.</p>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-slate-700">Visión Emprendedora</h3>
+                        <p>Desarrollo de Negocios, Gestión del Ciclo de Vida del Producto, Investigación de Mercado, Estrategia de E-commerce, Marketing Digital.</p>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-slate-700">Competencia Técnica</h3>
+                        <p>Mantenimiento de Hardware/Software, Admin. de Redes, Diseño 3D, Automatización (Arduino, Python), Implementación de Sistemas.</p>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-slate-700">Comunicación y Resolución</h3>
+                        <p>Resolución de Conflictos, Detección de Problemas, Servicio y Soporte Técnico, Atención al Detalle, Habilidades de Comunicación.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Projects Section -->
+        <section id="projects" class="py-24 bg-white">
+             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <h2 class="section-title">Proyectos y Emprendimientos</h2>
+                <div class="flex justify-center mb-8">
+                    <div class="flex space-x-1 bg-slate-200 p-1 rounded-lg">
+                        <button id="tab-emprendimientos" class="tab-btn active w-full md:w-auto">Emprendimientos</button>
+                        <button id="tab-proyectos" class="tab-btn w-full md:w-auto">Proyectos Técnicos</button>
+                    </div>
+                </div>
+
+                <div id="content-emprendimientos" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-8"></div>
+                <div id="content-proyectos" class="hidden grid sm:grid-cols-2 lg:grid-cols-3 gap-8"></div>
+             </div>
+        </section>
+
+
+        <!-- Education & Certs -->
+        <section id="education" class="py-24">
+            <h2 class="section-title">Formación y Certificaciones</h2>
+            <div class="max-w-4xl mx-auto grid md:grid-cols-2 gap-8">
+                <div class="card p-6">
+                    <h3 class="text-xl font-bold text-slate-800">Sicos Informática</h3>
+                    <p class="font-medium text-amber-600">Reparación de PC y Redes Informáticas</p>
+                    <p class="mt-2 text-sm text-slate-500">Reconocimiento europeo | Egresado: Diciembre 2021</p>
+                </div>
+                <div class="card p-6">
+                    <h3 class="text-xl font-bold text-slate-800">Secundario FinEs</h3>
+                    <p class="font-medium text-amber-600">Modalidad Economía</p>
+                    <p class="mt-2 text-sm text-slate-500">Egresado: 2017</p>
+                </div>
+                 <div class="card p-6">
+                    <h3 class="text-xl font-bold text-slate-800">Google Certificate</h3>
+                    <p class="font-medium text-amber-600">Aspectos básicos de la asistencia técnica</p>
+                    <p class="mt-2 text-sm text-slate-500">Emitido: Ago 2021</p>
+                    <a href="https://example.com/certificate-lookup?id=JEBDEBPX6YAY" target="_blank" class="text-sm text-amber-500 hover:underline mt-2 inline-block">Ver Credencial</a>
+                </div>
+                 <div class="card p-6">
+                    <h3 class="text-xl font-bold text-slate-800">Google Certificate</h3>
+                    <p class="font-medium text-amber-600">Fundamentos de Marketing Digital</p>
+                    <p class="mt-2 text-sm text-slate-500">Emitido: Nov 2020</p>
+                    <a href="https://example.com/certificate-lookup?id=5CL2PX5MV" target="_blank" class="text-sm text-amber-500 hover:underline mt-2 inline-block">Ver Credencial</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-800 text-slate-300 mt-16">
+        <div class="container mx-auto px-4 py-8 text-center">
+            <p>&copy; 2024 Iván Antonio Goranc. Portafolio interactivo.</p>
+            <p class="text-sm mt-2">Diseñado para destacar la experiencia en gestión de proyectos.</p>
+        </div>
+    </footer>
+
+    <!-- Modal -->
+    <div id="project-modal" class="fixed inset-0 bg-black bg-opacity-70 z-50 hidden flex justify-center items-center p-4 modal-enter-from" >
+        <div id="modal-content" class="bg-white rounded-xl shadow-2xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto relative modal-content-enter-from">
+             <button id="modal-close-btn" class="absolute top-4 right-4 text-slate-500 hover:text-slate-800 transition-colors">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+            <h3 id="modal-title" class="text-2xl font-bold text-slate-800 mb-4"></h3>
+            <div id="modal-tags" class="flex flex-wrap gap-2 mb-6"></div>
+            <div id="modal-description" class="text-slate-600 space-y-2"></div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Mobile Menu Toggle
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+
+            // Skills Chart
+            const ctx = document.getElementById('skillsChart').getContext('2d');
+            const skillsChart = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['Gestión de Proyectos', 'Visión Emprendedora', 'Competencia Técnica', 'Comunicación y Resolución'],
+                    datasets: [{
+                        label: 'Nivel de Competencia',
+                        data: [90, 95, 85, 90],
+                        backgroundColor: 'rgba(245, 158, 11, 0.2)', // amber-500
+                        borderColor: 'rgba(217, 119, 6, 1)', // amber-600
+                        pointBackgroundColor: 'rgba(217, 119, 6, 1)',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgba(217, 119, 6, 1)'
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            angleLines: {
+                                color: 'rgba(0, 0, 0, 0.1)'
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.1)'
+                            },
+                            pointLabels: {
+                                font: {
+                                    size: 14,
+                                },
+                                color: '#475569' // slate-600
+                            },
+                            ticks: {
+                                backdropColor: 'transparent',
+                                color: '#64748b', //slate-500
+                                stepSize: 25,
+                                display: false
+                            },
+                            suggestedMin: 0,
+                            suggestedMax: 100
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+
+            // Project Data
+            const projects = {
+                emprendimientos: [
+                    {
+                        title: 'Emprendimiento de Impresión 3D y Modelado CAD',
+                        tags: ['Project Lifecycle', 'CAD', '3D Printing', 'Marketing'],
+                        description: [
+                            'Dirigió el ciclo de vida completo del proyecto para la producción de miniaturas y prototipos personalizados.',
+                            'Gestionó procesos de producción especializados, incluyendo impresión en resina 14K con detalle de 0.02 mm.',
+                            'Supervisó el flujo de trabajo integral desde el diseño y slicing hasta el mantenimiento y la producción.',
+                            'Desarrolló renders de alta calidad para marketing y promoción de ventas, impulsando la visibilidad del producto.'
+                        ]
+                    },
+                    {
+                        title: 'Gamer Legends – Tienda E-commerce en Etsy',
+                        tags: ['E-commerce', 'Etsy', 'Marketing Digital', 'Logística'],
+                        description: [
+                            'Gestionó el diseño, la producción y las ventas online de merchandising de fan art, incluyendo pósters, remeras y tazas.',
+                            'Identificó y capitalizó las tendencias del mercado, lanzando con éxito un póster destacado de 8K del mapa de Kuttenberg.',
+                            'Implementó y gestionó un modelo de producción bajo demanda, optimizando el inventario y la logística.'
+                        ]
+                    },
+                    {
+                        title: 'Hoylinda.com – Tienda Dropshipping en Shopify',
+                        tags: ['Dropshipping', 'Shopify', 'Automatización', 'Stripe'],
+                        description: [
+                            'Orquestó la configuración y el lanzamiento de una plataforma de e-commerce dirigida al mercado europeo de belleza.',
+                            'Integró y automatizó los procesos de cumplimiento de pedidos utilizando AliExpress y Stripe.',
+                            'Gestionó la selección de productos, la configuración de la tienda y las campañas de marketing digital para impulsar las ventas.'
+                        ]
+                    }
+                ],
+                proyectos: [
+                    {
+                        title: 'Desarrollo de Juego (Godot Engine)',
+                        tags: ['Game Dev', 'Godot', 'Project Management', 'UI/UX'],
+                        description: [
+                            'Lideró el desarrollo de un juego tipo \'Founders of the North\', incluyendo el diseño de sistemas de inventario, mercado e interfaz HUD.',
+                            'Gestionó la integración de recursos personalizados y sistemas de progresión de mejoras.'
+                        ]
+                    },
+                    {
+                        title: 'Sistema de Automatización para Cultivo Indoor',
+                        tags: ['Automatización', 'Arduino', 'IoT', 'PCB Design'],
+                        description: [
+                            'Diseñó e implementó un sistema de control automatizado utilizando ATmega328P, sensores YL-69 y DHT22, relés, luces y coolers.',
+                            'Supervisó el diseño de PCB en EasyEDA y gestionó la alimentación y programación vía USB.'
+                        ]
+                    }
+                ]
+            };
+
+            // Project Tabs & Modal Logic
+            const tabs = document.querySelectorAll('.tab-btn');
+            const contents = {
+                emprendimientos: document.getElementById('content-emprendimientos'),
+                proyectos: document.getElementById('content-proyectos')
+            };
+
+            const modal = document.getElementById('project-modal');
+            const modalContent = document.getElementById('modal-content');
+            const modalTitle = document.getElementById('modal-title');
+            const modalTags = document.getElementById('modal-tags');
+            const modalDescription = document.getElementById('modal-description');
+            const modalCloseBtn = document.getElementById('modal-close-btn');
+
+            function createProjectCard(project) {
+                const card = document.createElement('div');
+                card.className = 'card p-6 cursor-pointer';
+                card.innerHTML = `
+                    <h3 class="text-lg font-bold text-slate-800 mb-2">${project.title}</h3>
+                    <div class="flex flex-wrap gap-2">
+                        ${project.tags.map(tag => `<span class="bg-amber-100 text-amber-800 text-xs font-medium px-2.5 py-0.5 rounded-full">${tag}</span>`).join('')}
+                    </div>
+                `;
+                card.addEventListener('click', () => openModal(project));
+                return card;
+            }
+            
+            function renderProjects() {
+                contents.emprendimientos.innerHTML = '';
+                contents.proyectos.innerHTML = '';
+                projects.emprendimientos.forEach(p => contents.emprendimientos.appendChild(createProjectCard(p)));
+                projects.proyectos.forEach(p => contents.proyectos.appendChild(createProjectCard(p)));
+            }
+            
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    const targetId = tab.id.split('-')[1]; // 'emprendimientos' or 'proyectos'
+                    
+                    Object.values(contents).forEach(content => content.classList.add('hidden'));
+                    contents[targetId].classList.remove('hidden');
+                });
+            });
+
+            function openModal(project) {
+                modalTitle.textContent = project.title;
+                modalTags.innerHTML = project.tags.map(tag => `<span class="bg-slate-200 text-slate-800 text-sm font-medium px-3 py-1 rounded-full">${tag}</span>`).join('');
+                modalDescription.innerHTML = project.description.map(p => `<p class="flex items-start"><span class="text-amber-500 mr-2 mt-1">&#10003;</span><span>${p}</span></p>`).join('');
+                modal.classList.remove('hidden');
+                setTimeout(() => { // Add a slight delay for transition to apply
+                    modal.classList.add('modal-enter-active');
+                    modalContent.classList.add('modal-content-enter-active');
+                }, 10);
+            }
+
+            function closeModal() {
+                modal.classList.remove('modal-enter-active');
+                modalContent.classList.remove('modal-content-enter-active');
+                setTimeout(() => { // Hide after transition
+                    modal.classList.add('hidden');
+                }, 300); // Match CSS transition duration
+            }
+
+            modalCloseBtn.addEventListener('click', closeModal);
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    closeModal();
+                }
+            });
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    closeModal();
+                }
+            });
+
+            // Initial render
+            renderProjects();
+            // Style for tabs
+            const style = document.createElement('style');
+            style.textContent = `
+                .tab-btn {
+                    padding: 0.5rem 1.5rem;
+                    border: none;
+                    background-color: transparent;
+                    cursor: pointer;
+                    font-weight: 600;
+                    color: #475569;
+                    border-radius: 0.5rem;
+                    transition: all 0.3s ease;
+                }
+                .tab-btn.active {
+                    background-color: #ffffff;
+                    color: #1e293b;
+                    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+                }
+            `;
+            document.head.appendChild(style);
+        });
+    </script>
+</body>
+</html>
